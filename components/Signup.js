@@ -30,17 +30,40 @@ function Signup() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [employeeId, setEmployeeId] = useState('');
 
-  const handleSignup = () => {
-    console.log('First Name: ' + firstName);
-    console.log('Last Name: ' + lastName);
-    console.log('Email: ' + email);
-    console.log('Password: ' + password);
-    console.log('Designation: ' + designation);
-    console.log('Phone Number: ' + phoneNumber);
-    console.log('Employee ID: ' + employeeId);
-
-    navigation.replace('HomeScreen');
-  };
+  // const signUp = () => {
+  //   firstName,
+  //   lastName,
+  //   email,
+  //   password,
+  //   designation,
+  //   phoneNumber,
+  //   employeeId
+  // }
+  const fetchData = async () => {
+    const response =  await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json", {
+      method:"POST",
+      headers: {
+        'Content-Type':" application/json",
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        password,
+        designation,
+        phoneNumber,
+        employeeId
+      }),
+    })
+    alert("Registered successfully.")
+    console.log(response)
+    if(!response) {
+      throw new Error("Failed.")
+    }
+    const data = await response.json();
+    console.log("Data sent: ", data);
+    navigation.replace('Login');
+  }
 
   const goToLogin = () => {
     navigation.navigate('Login');
@@ -48,11 +71,12 @@ function Signup() {
 
   return (
     <SafeAreaView style={styles.main}>
-        <ScrollView>
       <ImageBackground
         source={require('../assets/pictures/signup_bg.jpg')}
         style={styles.backgroundImage}
       >
+        <ScrollView style={styles.scrollContainer}>
+
         <View style={styles.container}>
           <Text style={styles.signup}>Sign Up</Text>
           <Text style={styles.normalText}>
@@ -65,6 +89,7 @@ function Signup() {
             placeholder="Enter your first name"
             value={firstName}
             onChangeText={(text) => setFirstName(text)}
+            inputMode='text'
           />
 
           <Text style={styles.label}>Last Name</Text>
@@ -73,6 +98,7 @@ function Signup() {
             placeholder="Enter your last name"
             value={lastName}
             onChangeText={(text) => setLastName(text)}
+            inputMode='text'
           />
 
           <Text style={styles.label}>Email</Text>
@@ -81,6 +107,7 @@ function Signup() {
             placeholder="Enter your email"
             value={email}
             onChangeText={(text) => setEmail(text)}
+            inputMode='email'
           />
 
           <Text style={styles.label}>Password</Text>
@@ -98,6 +125,7 @@ function Signup() {
             placeholder="Enter your designation"
             value={designation}
             onChangeText={(text) => setDesignation(text)}
+            inputMode='text'
           />
 
           <Text style={styles.label}>Phone Number</Text>
@@ -106,6 +134,7 @@ function Signup() {
             placeholder="Enter your phone number"
             value={phoneNumber}
             onChangeText={(text) => setPhoneNumber(text)}
+            inputMode='tel'
           />
 
           <Text style={styles.label}>Employee ID</Text>
@@ -114,9 +143,10 @@ function Signup() {
             placeholder="Enter your employee ID"
             value={employeeId}
             onChangeText={(text) => setEmployeeId(text)}
+            inputMode='numeric'
           />
 
-          <TouchableOpacity onPress={handleSignup} style={styles.signupButton}>
+          <TouchableOpacity onPress={fetchData} style={styles.signupButton}>
             <Text style={styles.buttonText}>Signup</Text>
             <FontAwesome5 name="user-plus" size={20} color="white" style={styles.icon} />
           </TouchableOpacity>
@@ -125,8 +155,9 @@ function Signup() {
             Already have an account? Click to login.
           </Text>
         </View>
-      </ImageBackground>
+
       </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -136,6 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    margin: 10
   },
   backgroundImage: {
     width: screenWidth,
@@ -168,9 +200,12 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: 5,
-    margin: 50,
-    width: screenWidth,
+    margin: 20,  // Adjust margin to provide spacing from screen edges
+    width: screenWidth - 40,  // Adjust width to provide spacing on both sides
   },
+  scrollContainer: {
+    flexGrow: 1,
+  },  
   label: {
     fontWeight: 'bold',
     marginBottom: 8,
@@ -185,8 +220,10 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderRadius: 5,
     backgroundColor: 'white',
-    fontFamily: 'Raleway-Regular'
+    fontFamily: 'Raleway-Regular',
+    color: 'black',  // Set the text color to ensure visibility
   },
+
   loginText: {
     color: 'white',
     marginTop: 15,

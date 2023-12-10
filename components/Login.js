@@ -20,22 +20,51 @@ function Login({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         console.log('Email: ' + email);
         console.log('Password: ' + password);
 
-        // Navigate to the Home screen
-        navigation.replace('HomeScreen');
+        try {
+            const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json");
+              alert("Fetching")
+            if (!response.ok) {
+              throw new Error("Failed to fetch data");
+            }
+        
+            const data = await response.json();
+            Object.values(data).find((user) => {
+                if (user.email === email && user.password === password) {
+                       // Navigate to the Home screen
+                    alert("Logging in...")
+                    navigation.replace('HomeScreen');
+                } else {
+                    alert("Add correct credentials")
+
+                    setEmail('');
+                    setPassword('');
+
+                    console.log("Wrong Credentials")
+                }
+            })
+            // Check if 'password' property exists before logging
+          
+          } catch (error) {
+            console.error("Error fetching data:", error.message);
+          }
+
+     
     };
 
     const goToSignup = () => {
         navigation.navigate('Signup');
     };
+    
 
     return (
         <SafeAreaView
             style={styles.main}
         >
+            
             <ImageBackground
                 source={require('../assets/pictures/courthouse-building.jpg')}
                 style={styles.main}>
@@ -54,6 +83,7 @@ function Login({ navigation }) {
                             placeholder="Enter your email"
                             value={email}
                             onChangeText={(text) => setEmail(text)}
+                            inputMode='email'
                         />
                     </View>
                     <View style={styles.inputContainer}>

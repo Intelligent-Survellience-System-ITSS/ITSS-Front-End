@@ -41,12 +41,12 @@ const Settings = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.black
     },
     settingsText: {
         fontSize: 32,
         color: colors.orange,
         textAlign: 'center',
-        backgroundColor: colors.black,
         fontFamily: 'Raleway-Regular',
         margin: 10
     },
