@@ -1,70 +1,67 @@
-// Import the necessary components and libraries
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ImageBackground, Dimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import { FontAwesome5 } from '@expo/vector-icons'; // Import FontAwesome5
-
-// importing globals:
+import { FontAwesome5 } from '@expo/vector-icons';
+import { useUser } from './UserContext';
 import colors from '../globals/Colors';
 
-// Get the device's screen height and width
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 function Login({ navigation }) {
-    const [fontsLoaded] = useFonts({
-        'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
-    });
+  const { login } = useUser();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+  const [fontsLoaded] = useFonts({
+    'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
+  });
 
-    const handleLogin = async () => {
-        console.log('Email: ' + email);
-        console.log('Password: ' + password);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-        try {
-            const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json");
-              alert("Fetching")
-            if (!response.ok) {
-              throw new Error("Failed to fetch data");
-            }
-        
-            const data = await response.json();
-            Object.values(data).find((user) => {
-                if (user.email === email && user.password === password) {
-                       // Navigate to the Home screen
-                    alert("Logging in...")
-                    navigation.replace('HomeScreen');
-                } else {
-                    alert("Add correct credentials")
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-                    setEmail('');
-                    setPassword('');
+  const handleLogin = async () => {
+    setEmailError('');
+    setPasswordError('');
 
-                    console.log("Wrong Credentials")
-                }
-            })
-            // Check if 'password' property exists before logging
-          
-          } catch (error) {
-            console.error("Error fetching data:", error.message);
-          }
+    try {
+      const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json");
 
-     
-    };
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+
+      const user = Object.values(data).find((user) => user.email === email && user.password === password);
+
+      if (user) {
+        // Set the global state with the logged-in user data
+        login(user);
+
+        alert("Logging in...");
+        navigation.replace('HomeScreen');
+      } else {
+        alert("Invalid email or password");
+
+        setEmail('');
+        setPassword('');
+
+        console.log("Invalid Credentials");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error.message);
+    }
+  };
 
     const goToSignup = () => {
         navigation.navigate('Signup');
     };
-    
 
     return (
-        <SafeAreaView
-            style={styles.main}
-        >
-            
+        <SafeAreaView style={styles.main}>
             <ImageBackground
                 source={require('../assets/pictures/courthouse-building.jpg')}
                 style={styles.main}>
@@ -85,6 +82,7 @@ function Login({ navigation }) {
                             onChangeText={(text) => setEmail(text)}
                             inputMode='email'
                         />
+                        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
                     </View>
                     <View style={styles.inputContainer}>
                         <View style={styles.labelContainer}>
@@ -97,6 +95,7 @@ function Login({ navigation }) {
                             value={password}
                             onChangeText={(text) => setPassword(text)}
                         />
+                        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
                     </View>
                     <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                         <FontAwesome5 name="sign-in-alt" size={20} color="white" style={styles.loginIcon} />
@@ -156,7 +155,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         fontFamily: 'Raleway-Regular'
     },
-
     provide_details_text: {
         color: 'white',
         margin: 5,
@@ -189,6 +187,11 @@ const styles = StyleSheet.create({
     },
     loginIcon: {
         marginRight: 10,
+    },
+    errorText: {
+        color: 'red',
+        marginTop: 5,
+        fontFamily: 'Raleway-Regular',
     },
 });
 

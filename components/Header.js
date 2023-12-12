@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
@@ -9,7 +9,7 @@ import { useFonts } from 'expo-font';
 // importing globals:
 import colors from '../globals/Colors';
 
-export default function Header({ title }) {
+export default function Header() {
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('../assets/fonts/Inter/Inter-Regular.ttf'),
     'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
@@ -19,17 +19,14 @@ export default function Header({ title }) {
   const [isMenuVisible, setMenuVisible] = useState(false);
 
   const handleProfileClick = () => {
-    // navigate to ProfileScreen
     navigation.navigate('ProfileScreen');
   };
 
   const handleITSSClick = () => {
-    // assume this takes the user to the home screen
     navigation.navigate('HomeScreen');
   };
 
   const toggleMenu = () => {
-    // toggle the menu visibility
     setMenuVisible(!isMenuVisible);
   };
 
@@ -52,8 +49,10 @@ export default function Header({ title }) {
         <Ionicons name="person-outline" size={24} color={colors.white} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.headerItem} onPress={handleITSSClick}>
-        <Text style={styles.ITSS}>ITSS</Text>
+      <TouchableOpacity onPress={handleITSSClick}>
+        <View style={styles.logoContainer}>
+          <Image source={require('../assets/pictures/logoITSS.png')} style={styles.logoImage} resizeMode="contain" />
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.headerItem} onPress={toggleMenu}>
@@ -87,7 +86,6 @@ export default function Header({ title }) {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderBottomColor: colors.white,
@@ -104,11 +102,19 @@ const styles = StyleSheet.create({
   icon: {
     fontWeight: 'bold',
   },
-  ITSS: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.orange,
-    fontFamily: 'Inter-Regular',
+  logoContainer: {
+    width: 90, // Increased width for the circle
+    height: 50, // Increased height for the circle
+    borderBottomLeftRadius: 80, // Adjusted radius for the semicircle
+    borderBottomRightRadius: 80, // Adjusted radius for the semicircle
+    overflow: 'hidden',
+    backgroundColor: colors.white,
+    marginTop: -5,
+    paddingBottom: 5
+  },
+  logoImage: {
+    width: '100%', // Occupy the entire space of the container
+    height: '100%', // Occupy the entire space of the container 
   },
   modalContainer: {
     backgroundColor: colors.black,

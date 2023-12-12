@@ -11,20 +11,19 @@ const AboutUs = () => {
       <Header />
 
       <View style={styles.content}>
-        <Text style={styles.title}>About ITSS</Text>
+        <Text style={styles.title}>ITSS</Text>
         <Text style={styles.description}>
           ITSS (Intelligent Traffic Surveillance System) is an advanced traffic monitoring and management system. 
           Our system leverages cutting-edge technologies to analyze traffic patterns, monitor congestion, and provide 
           real-time insights for efficient traffic flow.
         </Text>
-        <Text style={styles.description}>
-          Key Features:
-        </Text>
-        <Text style={styles.feature}>- Real-time Traffic Monitoring</Text>
-        <Text style={styles.feature}>- Intelligent Congestion Analysis</Text>
-        <Text style={styles.feature}>- Automated Traffic Alerts</Text>
-        <Text style={styles.feature}>- Historical Traffic Data Analytics</Text>
-        <Text style={styles.feature}>- User-Friendly Interface</Text>
+        <View style={styles.featuresContainer}>
+          <Text style={styles.feature}>- Real-time Traffic Monitoring</Text>
+          <Text style={styles.feature}>- Intelligent Congestion Analysis</Text>
+          <Text style={styles.feature}>- Automated Traffic Alerts</Text>
+          <Text style={styles.feature}>- Historical Traffic Data Analytics</Text>
+          <Text style={styles.feature}>- User-Friendly Interface</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -50,13 +49,16 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     color: colors.white,
-    marginBottom: 10,
+    marginBottom: 20,
     textAlign: 'justify'
+  },
+  featuresContainer: {
+    alignItems: 'flex-start',
+    marginBottom: 20,
   },
   feature: {
     fontSize: 16,
     color: colors.orange,
-    marginLeft: 10,
     marginBottom: 5,
   },
 });

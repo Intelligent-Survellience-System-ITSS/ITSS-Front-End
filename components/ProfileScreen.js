@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../globals/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import { useUser } from './UserContext';
 
 export default function ProfileScreen({ navigation }) {
+  const { user } = useUser();
 
-  const [fontsLoaded] = useFonts ({
+  const [fontsLoaded] = useFonts({
     'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
     'Inter-Black': require('../assets/fonts/Inter/Inter-Black.ttf')
-  }) 
+  });
 
-  const [firstName, setFirstName] = useState('John');
-  const [lastName, setLastName] = useState('Doe');
-  const [designation, setDesignation] = useState('Software Engineer');
-  const [employeeId, setEmployeeId] = useState('12345');
+  const [localFirstName, setLocalFirstName] = useState('');
+  const [localLastName, setLocalLastName] = useState('');
+  const [localDesignation, setLocalDesignation] = useState('');
+  const [localEmployeeId, setLocalEmployeeId] = useState('');
+
+  useEffect(() => {
+    // update local state when user data becomes available
+    if (user) {
+      setLocalFirstName(user.firstName);
+      setLocalLastName(user.lastName || '');
+      setLocalDesignation(user.designation || '');
+      setLocalEmployeeId(user.employeeId || '');
+    }
+  }, [user]);
 
   const goBack = () => {
     navigation.goBack();
@@ -26,80 +38,73 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleUpdateProfile = () => {
-    // For demonstration purposes, we will just log the updated values
-    console.log('Updated Profile:');
-    console.log('First Name:', firstName);
-    console.log('Last Name:', lastName);
-    console.log('Designation:', designation);
-    console.log('Employee ID:', employeeId);
+    // console.log('Updated Profile:');
+    // console.log('First Name:', localFirstName);
+    // console.log('Last Name:', localLastName);
+    // console.log('Designation:', localDesignation);
+    // console.log('Employee ID:', localEmployeeId);
   };
 
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
-        <View style={styles.header}>
-            <TouchableOpacity onPress={goBack}>
-            <Ionicons name="arrow-back" size={24} style={styles.icon} />
-            </TouchableOpacity>
-            <Text style={styles.headerText}>ITSS</Text>
-        </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={goBack}>
+          <Ionicons name="arrow-back" size={24} style={styles.icon} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>ITSS</Text>
+      </View>
 
-        <View style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.headerLine} />
 
         <View style={styles.content}>
-            <Text style={styles.profileHeading}>Profile</Text>
+          <Text style={styles.profileHeading}>Profile</Text>
 
-            <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}>
             <Text style={styles.label}>First Name</Text>
             <TextInput
-                style={styles.input}
-                placeholder="Enter your first name"
-                value={firstName}
-                onChangeText={(text) => setFirstName(text)}
+              style={styles.input}
+              value={localFirstName}
+              onChangeText={(text) => setLocalFirstName(text)}
             />
-            </View>
+          </View>
 
-            <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}>
             <Text style={styles.label}>Last Name</Text>
             <TextInput
-                style={styles.input}
-                placeholder="Enter your last name"
-                value={lastName}
-                onChangeText={(text) => setLastName(text)}
+              style={styles.input}
+              value={localLastName}
+              onChangeText={(text) => setLocalLastName(text)}
             />
-            </View>
+          </View>
 
-            <View style={styles.inputContainer}>
-            <Text style={styles.label}>Designation</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Department</Text>  
             <TextInput
-                style={styles.input}
-                placeholder="Enter your designation"
-                value={designation}
-                onChangeText={(text) => setDesignation(text)}
+              style={styles.input}
+              value={localDesignation}
+              onChangeText={(text) => setLocalDesignation(text)}
             />
-            </View>
+          </View>
 
-            <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}>
             <Text style={styles.label}>Employee ID</Text>
             <TextInput
-                style={styles.input}
-                placeholder="Enter your employee ID"
-                value={employeeId}
-                onChangeText={(text) => setEmployeeId(text)}
+              style={styles.input}
+              value={localEmployeeId}
+              onChangeText={(text) => setLocalEmployeeId(text)}
             />
-            </View>
+          </View>
 
-            <TouchableOpacity style={styles.updateButton} onPress={handleUpdateProfile}>
+          <TouchableOpacity style={styles.updateButton} onPress={handleUpdateProfile}>
             <Text style={styles.updateButtonText}>Update Profile</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.itssContainer} onPress={goToHomeScreen}>
-            <Text style={styles.itssText}>ITSS</Text>
+          <Text style={styles.itssText}>ITSS</Text>
         </TouchableOpacity>
-        </View>
+      </View>
     </SafeAreaView>
   );
 }
