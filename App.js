@@ -5,12 +5,14 @@ import { createStackNavigator } from '@react-navigation/stack';
 // importing components:
 import Login from './components/Login';
 import Signup from './components/Signup';
-import HomeScreen from './components/HomeScreen';
 import SplashScreen from './components/Splash';
 import ProfileScreen from './components/ProfileScreen';
 import Settings from './components/Settings';
 import AboutUs from './components/AboutUs';
 import { UserProvider } from './components/UserContext';
+import TrafficPoliceHomeScreen from './components/TrafficPoliceHomeScreen';
+import FireBrigadeHomeScreen from './components/FireBrigadeHomeScreen';
+import ParamedicsHomeScreen from './components/ParamedicsHomeScreen';
 
 const Stack = createStackNavigator();
 
@@ -37,8 +39,16 @@ const App = () => {
             component={Signup}
           />
           <Stack.Screen
-            name="HomeScreen"
-            component={HomeScreen}
+            name="TrafficPoliceHomeScreen"
+            component={TrafficPoliceHomeScreen}
+          />
+          <Stack.Screen
+            name="ParamedicsHomeScreen"
+            component={ParamedicsHomeScreen}
+          />
+          <Stack.Screen
+            name="FireBrigadeHomeScreen"
+            component={FireBrigadeHomeScreen}
           />
           <Stack.Screen
             name="AboutUs"

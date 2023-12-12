@@ -24,7 +24,7 @@ const MenuButton = ({ onPress }) => (
   </TouchableOpacity>
 );
 
-const HomeScreen = () => {
+const TrafficPoliceHomeScreen = () => {
 
   const [fontsLoaded] = useFonts ({
     'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf')
@@ -111,7 +111,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
   },
   headerText: {
     fontSize: 20,
@@ -145,4 +144,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default TrafficPoliceHomeScreen;

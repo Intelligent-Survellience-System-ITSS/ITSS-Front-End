@@ -25,30 +25,43 @@ function Login({ navigation }) {
   const handleLogin = async () => {
     setEmailError('');
     setPasswordError('');
-
+  
     try {
       const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json");
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-
+  
       const data = await response.json();
-
+  
       const user = Object.values(data).find((user) => user.email === email && user.password === password);
-
+  
       if (user) {
         // Set the global state with the logged-in user data
         login(user);
-
-        alert("Logging in...");
-        navigation.replace('HomeScreen');
+  
+        // Navigate to the home screen based on designation
+        switch (user.designation) {
+          case 'Paramedics':
+            navigation.replace('ParamedicsHomeScreen');
+            break;
+          case 'Fire Brigade':
+            navigation.replace('FireBrigadeHomeScreen');
+            break;
+          case 'Traffic Police':
+            navigation.replace('TrafficPoliceHomeScreen');
+            break;
+          default:
+            navigation.replace('DefaultHomeScreen');
+            break;
+        }
       } else {
         alert("Invalid email or password");
-
+  
         setEmail('');
         setPassword('');
-
+  
         console.log("Invalid Credentials");
       }
     } catch (error) {

@@ -1,70 +1,64 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, Switch, StyleSheet } from 'react-native';
-import { useFonts } from 'expo-font';
-
-// importing components:
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import colors from '../globals/Colors';
 import Header from './Header';
 
-// importing globals:
-import colors from '../globals/Colors';
-
 const Settings = () => {
-    const [fontsLoaded] = useFonts({
-        'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
-    });
-    const [isSwitchOn, setSwitchOn] = useState(true); // Set the switch to be on by default
+  const [isDarkTheme, setDarkTheme] = useState(true);
 
-    const toggleSwitch = () => setSwitchOn((prevState) => !prevState);
+  const handleToggleTheme = () => {
+    setDarkTheme((prevTheme) => !prevTheme);
+    // Handle theme toggle logic here
+    console.log('Theme switched to:', isDarkTheme ? 'Light' : 'Dark');
+  };
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <Header />
-            <Text style={styles.settingsText}>
-                Settings
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkTheme ? colors.black : colors.white }]}>
+      <Header />
+      <View style={styles.main}>
+        <Text style={[styles.settingsText, { color: isDarkTheme ? colors.orange : colors.black }]}>Settings</Text>
+        <TouchableOpacity onPress={handleToggleTheme} style={styles.themeButton}>
+            <Ionicons name={isDarkTheme ? 'moon' : 'sunny'} size={24} color={isDarkTheme ? colors.black : colors.black} />
+            <Text style={[styles.themeButtonText, { color: isDarkTheme ? colors.black : colors.black }]}>
+            {isDarkTheme ? 'Dark Theme' : 'Light Theme'}
             </Text>
-            <View style={styles.content}>
-                <View style={styles.switchContainer}>
-                    <Text style={styles.switchLabel}>Dark Mode</Text>
-                    <Switch
-                        trackColor={{ false: colors.orange, true: colors.orange }}
-                        thumbColor={isSwitchOn ? colors.white : colors.black}
-                        ios_backgroundColor={colors.dark_black}
-                        onValueChange={toggleSwitch}
-                        value={isSwitchOn}
-                    />
-                </View>
-            </View>
-        </SafeAreaView>
-    );
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.black
-    },
-    settingsText: {
-        fontSize: 32,
-        color: colors.orange,
-        textAlign: 'center',
-        fontFamily: 'Raleway-Regular',
-        margin: 10
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.black,
-    },
-    switchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    switchLabel: {
-        fontSize: 24,
-        color: colors.white,
-        marginRight: 20,
-    },
+  container: {
+    flex: 1,
+  },
+  main: {
+    margin: 20
+  },
+  settingsText: {
+    fontSize: 32,
+    textAlign: 'center',
+    fontFamily: 'Raleway-Regular',
+    margin: 10,
+  },
+  themeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.orange,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  themeButtonText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    fontFamily: 'Raleway-Regular',
+    marginLeft: 10,
+    color: colors.black
+  },
 });
 
 export default Settings;

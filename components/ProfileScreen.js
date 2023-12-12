@@ -91,7 +91,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.label}>Employee ID</Text>
             <TextInput
               style={styles.input}
-              value={localEmployeeId}
+              value={localEmployeeId} 
               onChangeText={(text) => setLocalEmployeeId(text)}
             />
           </View>

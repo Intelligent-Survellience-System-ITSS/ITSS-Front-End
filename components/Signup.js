@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ImageBackground, Dimensions, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  ImageBackground,
+  Dimensions,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
 // importing globals:
 import colors from '../globals/Colors';
-
-// importing components:
 
 // get the device's screen height and width
 const screenHeight = Dimensions.get('window').height;
@@ -20,6 +27,13 @@ const MIN_LENGTH_NAME = 3;
 const MAX_LENGTH_NAME = 15;
 const MIN_LENGTH_PASS = 6;
 const isAlphabetic = (text) => /^[a-zA-Z]+$/.test(text);
+
+const generateUniqueId = () => {
+  // Generate a random string or use a library like uuid to create a unique ID
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15).toUpperCase();
+};
+
+const userId = generateUniqueId();
 
 function Signup() {
   const [fontsLoaded] = useFonts({
@@ -35,18 +49,80 @@ function Signup() {
   const [designation, setDesignation] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [employeeId, setEmployeeId] = useState('');
+  const [selectedDesignation, setSelectedDesignation] = useState('');
 
   // state variables for errors
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [designationError, setDesignationError] = useState('');
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [employeeIdError, setEmployeeIdError] = useState('');
+  const [designationError, setDesignationError] = useState('');
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const goToDesignationScreen = () => {
+    setModalVisible(true);
+    setDesignation('');
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  const saveDesignation = async (selectedDesignation, userId) => {
+    try {
+      const userData = {
+        [userId]: {
+          firstName,
+          lastName,
+          email,
+          password,
+          phoneNumber,
+          employeeId,
+          designation: selectedDesignation,
+        },
+      };
+  
+      // Perform the necessary API call to update the user's data
+      const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json", {
+        method: "PATCH",  // Use PATCH to update an existing user record
+        headers: {
+          'Content-Type': "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update user data.');
+      }
+  
+      // Assume the user data is successfully updated
+      alert('User data saved successfully.');
+  
+      // Now, you can navigate to different home screens based on the designation
+      switch (selectedDesignation) {
+        case 'Paramedics':
+          navigation.replace('ParamedicsHomeScreen');
+          break;
+        case 'Fire Brigade':
+          navigation.replace('FireBrigadeHomeScreen');
+          break;
+        case 'Traffic Police':
+          navigation.replace('TrafficPoliceHomeScreen');
+          break;
+        default:
+          navigation.replace('DefaultHomeScreen');
+          break;
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      alert('Failed to update user data. Please try again.');
+    }
+  };
 
   const fetchData = async () => {
-
     // reset error states
     setFirstNameError('');
     setLastNameError('');
@@ -55,86 +131,54 @@ function Signup() {
     setDesignationError('');
     setPhoneNumberError('');
     setEmployeeIdError('');
-
+  
     // validate inputs
-    if (!firstName || !lastName || !email || !password || !designation || !phoneNumber || !employeeId) {
+    if (!firstName || !lastName || !email || !password || !phoneNumber || !employeeId) {
       alert('Please fill all the fields.');
       return;
     }
-
+  
     // validate individual fields
     if (firstName.length < MIN_LENGTH_NAME || firstName.length > MAX_LENGTH_NAME) {
       setFirstNameError('First Name should be between 3 and 20 characters.');
       return;
     }
-
+  
     if (lastName.length < MIN_LENGTH_NAME || lastName.length > MAX_LENGTH_NAME) {
       setLastNameError('Last Name should be between 3 and 20 characters.');
       return;
     }
-
+  
     // validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError('Enter a valid email address.');
       return;
     }
-
+  
     // validate password length
     if (password.length < MIN_LENGTH_PASS) {
       setPasswordError(`Password should be at least ${MIN_LENGTH_PASS} characters.`);
       return;
     }
-
-    // validate designation
-    if (!designation) {
-      setDesignationError('Enter your designation.');
-      return;
-    }
-
+  
     // validate phone number format
-    const phoneRegex = /^[0-9]$/;
+    const phoneRegex = /^\d+$/;
     if (!phoneRegex.test(phoneNumber)) {
       setPhoneNumberError('Enter a valid 10-digit phone number.');
       return;
     }
-
-    // validate employee ID (optional: you can add custom validation for employee ID)
-    if (!employeeId) {
+  
+    // validate employee id
+    const employeeIdRegex = /^\d+$/;
+    if (!employeeIdRegex.test(employeeId)) {
       setEmployeeIdError('Enter your employee ID.');
       return;
     }
-
-    try {
-      const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json", {
-        method: "POST",
-        headers: {
-          'Content-Type': "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          password,
-          designation,
-          phoneNumber,
-          employeeId
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to register.');
-      }
-
-      alert('Registered successfully.');
-      const data = await response.json();
-      console.log('Data sent:', data);
-      navigation.replace('Login');
-    } catch (error) {
-      console.error('Error:', error.message);
-      alert('Failed to register. Please try again.');
-    }
-  }
+  
+    // If everything is valid, proceed to the designation screen
+    goToDesignationScreen(selectedDesignation, userId);
+  };  
 
   const goToLogin = () => {
     navigation.navigate('Login');
@@ -146,13 +190,14 @@ function Signup() {
         source={require('../assets/pictures/signup_bg.jpg')}
         style={styles.backgroundImage}
       >
+        {/* ... (existing code) */}
         <ScrollView style={styles.scrollContainer}>
           <View style={styles.container}>
             <Text style={styles.signup}>Sign Up</Text>
             <Text style={styles.normalText}>
               Please provide these details to create an account
             </Text>
-  
+
             <Text style={styles.label}>First Name</Text>
             <TextInput
               style={styles.input}
@@ -166,7 +211,7 @@ function Signup() {
               inputMode='text'
             />
             {firstNameError ? <Text style={styles.errorText}>{firstNameError}</Text> : null}
-  
+
             <Text style={styles.label}>Last Name</Text>
             <TextInput
               style={styles.input}
@@ -180,7 +225,7 @@ function Signup() {
               inputMode='text'
             />
             {lastNameError ? <Text style={styles.errorText}>{lastNameError}</Text> : null}
-  
+
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
@@ -190,7 +235,7 @@ function Signup() {
               inputMode='email'
             />
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-  
+
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={styles.input}
@@ -200,20 +245,7 @@ function Signup() {
               onChangeText={(text) => setPassword(text)}
             />
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-  
-            <Text style={styles.label}>Department</Text>
-            <Picker
-              style={styles.input}
-              selectedValue={designation}
-              onValueChange={(itemValue) => setDesignation(itemValue)}
-            >
-              <Picker.Item label="Select your department" value="" />
-              <Picker.Item label="Paramedics" value="Paramedics" />
-              <Picker.Item label="Fire Brigade" value="Fire Brigade" />
-              <Picker.Item label="Traffic Police" value="Traffic Police" />
-            </Picker>
-            {designationError ? <Text style={styles.errorText}>{designationError}</Text> : null}
-  
+
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
@@ -223,7 +255,7 @@ function Signup() {
               inputMode='tel'
             />
             {phoneNumberError ? <Text style={styles.errorText}>{phoneNumberError}</Text> : null}
-  
+
             <Text style={styles.label}>Employee ID</Text>
             <TextInput
               style={styles.input}
@@ -233,17 +265,46 @@ function Signup() {
               inputMode='numeric'
             />
             {employeeIdError ? <Text style={styles.errorText}>{employeeIdError}</Text> : null}
-  
+
             <TouchableOpacity onPress={fetchData} style={styles.signupButton}>
               <Text style={styles.buttonText}>Signup</Text>
               <FontAwesome5 name="user-plus" size={20} color="white" style={styles.icon} />
             </TouchableOpacity>
-  
+
             <Text style={styles.loginText} onPress={goToLogin}>
               Already have an account? Click to login.
             </Text>
           </View>
         </ScrollView>
+
+        {/* Designation selection modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => closeModal()}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.label}>Select your designation</Text>
+              <Picker
+                style={styles.picker}
+                selectedValue={designation}
+                onValueChange={(itemValue) => setDesignation(itemValue)}
+              >
+                <Picker.Item label="Paramedics" value="Paramedics" />
+                <Picker.Item label="Fire Brigade" value="Fire Brigade" />
+                <Picker.Item label="Traffic Police" value="Traffic Police" />
+              </Picker>
+              <TouchableOpacity onPress={() => saveDesignation(designation, userId)} style={styles.signupButton}>
+                <Text style={styles.buttonText}>Continue</Text>
+                <FontAwesome5 name="arrow-right" size={20} color="white" style={styles.icon} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+
       </ImageBackground>
     </SafeAreaView>
   );
@@ -254,7 +315,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 10
   },
   backgroundImage: {
     width: screenWidth,
@@ -310,6 +370,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Raleway-Regular',
     color: 'black',
   },
+  picker: {
+    color: colors.black_darker,
+    lineHeight: 50,
+    fontSize: 20,
+    backgroundColor: colors.white
+  },
   errorText: {
     color: 'red',
     marginBottom: 5,
@@ -338,6 +404,33 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     textAlign: 'center',
     fontFamily: 'Raleway-Regular',
+  },
+  designationContainer: {
+    padding: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 5,
+    margin: 20,
+    width: screenWidth - 40,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalContent: {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 5,
+    padding: 16,
+    width: screenWidth - 40,
   },
 });
 
