@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../globals/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import { useUser } from './UserContext';
+
+// importing globals:
+import { useUser } from '../globals/UserContext';
 
 export default function ProfileScreen({ navigation }) {
-  const { user } = useUser();
+  const { userData } = useUser();
+  console.log('User Data:', userData);
+
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   const [fontsLoaded] = useFonts({
     'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
@@ -20,21 +26,67 @@ export default function ProfileScreen({ navigation }) {
   const [localEmployeeId, setLocalEmployeeId] = useState('');
 
   useEffect(() => {
-    // update local state when user data becomes available
-    if (user) {
-      setLocalFirstName(user.firstName);
-      setLocalLastName(user.lastName || '');
-      setLocalDesignation(user.designation || '');
-      setLocalEmployeeId(user.employeeId || '');
+    const fetchData = async () => {
+      try {
+        // Simulate data fetching delay (e.g., 3 seconds)
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        if (userData) {
+          setUser(userData);
+          setLocalFirstName(userData.firstName || 'couldnt fetch data...');
+          setLocalLastName(userData.lastName || '');
+          setLocalDesignation(userData.designation || '');
+          setLocalEmployeeId(userData.employeeId || '');
+        } else {
+          console.log("User data is undefined");
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
+
+  useEffect(() => {
+    // Additional check to handle changes in userData
+    if (userData) {
+      setLocalFirstName(userData.firstName || 'couldnt fetch data...');
+      setLocalLastName(userData.lastName || '');
+      setLocalDesignation(userData.designation || '');
+      setLocalEmployeeId(userData.employeeId || '');
+      setLoading(false);
     }
-  }, [user]);
+  }, [userData]);
 
   const goBack = () => {
     navigation.goBack();
   };
 
   const goToHomeScreen = () => {
-    navigation.navigate('HomeScreen');
+    if (user && user.designation) {
+      switch (user.designation) {
+        case 'Paramedics':
+          navigation.replace('ParamedicsHomeScreen');
+          break;
+        case 'Fire Brigade':
+          navigation.replace('FireBrigadeHomeScreen');
+          break;
+        case 'Traffic Police':
+          navigation.replace('TrafficPoliceHomeScreen');
+          break;
+        default:
+          // Navigate to a default home screen if no designation matches
+          navigation.replace('DefaultHomeScreen');
+          break;
+      }
+    } else {
+      // Handle the case when user or designation is undefined
+      console.log("User or designation is undefined");
+    }
   };
 
   const handleUpdateProfile = () => {
@@ -79,7 +131,7 @@ export default function ProfileScreen({ navigation }) {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Department</Text>  
+            <Text style={styles.label}>Department</Text>
             <TextInput
               style={styles.input}
               value={localDesignation}
@@ -91,18 +143,25 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.label}>Employee ID</Text>
             <TextInput
               style={styles.input}
-              value={localEmployeeId} 
+              value={localEmployeeId}
               onChangeText={(text) => setLocalEmployeeId(text)}
             />
           </View>
 
-          <TouchableOpacity style={styles.updateButton} onPress={handleUpdateProfile}>
+          {/* <TouchableOpacity style={styles.updateButton} onPress={handleUpdateProfile}>
             <Text style={styles.updateButtonText}>Update Profile</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
-        <TouchableOpacity style={styles.itssContainer} onPress={goToHomeScreen}>
-          <Text style={styles.itssText}>ITSS</Text>
+        <TouchableOpacity
+          style={styles.itssContainer}
+          onPress={goToHomeScreen}
+        >
+          <ImageBackground
+            source={require('../assets/pictures/logoITSS.png')}
+            style={{ width: 100, height: 50 }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
     </SafeAreaView>

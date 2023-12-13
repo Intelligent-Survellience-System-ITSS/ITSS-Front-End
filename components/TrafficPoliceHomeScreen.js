@@ -1,106 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Platform } from 'react-native';
-import { Audio } from 'expo-av';
-// import * as FileSystem from 'expo-file-system';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal } from 'react-native';
+import { Video } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import { Video } from 'expo-av';
 
-// importing components:
+// Importing components:
 import Header from './Header';
 import colors from '../globals/Colors';
 import VideoOptions from './VideoOptions';
 
-// conditionally import VideoThumbnail based on the platform
-// let VideoThumbnail;
-// if (Platform.OS !== 'web') {
-//   VideoThumbnail = require('react-native-thumbnail-video').Thumbnail;
-// }
+const TrafficPoliceHomeScreen = () => {
+  const [fontsLoaded] = useFonts({
+    'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
+  });
+
+  const videos = [
+    require('../assets/videos/video1.mp4'),
+    require('../assets/videos/video2.mp4'),
+    require('../assets/videos/video3.mp4'),
+    require('../assets/videos/video4.mp4'),
+    // Add more video paths as needed
+  ];
+
+  const [status, setStatus] = useState({});
+  const [shouldPlay, setShouldPlay] = useState(Array(videos.length).fill(false));
+  const [capitalizedVideos, setCapitalizedVideos] = useState([]);
+  const flatListRef = useRef(null);
+
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+
+  const openOptionsModal = () => {
+    setOptionsModalVisible(true);
+  };
+
+  const closeOptionsModal = () => {
+    setOptionsModalVisible(false);
+  };
+
+  const capitalizeVideo = (index) => {
+    setCapitalizedVideos((prevCapitalizedVideos) => {
+      const updatedVideos = [...prevCapitalizedVideos];
+      const videoIndex = updatedVideos.indexOf(index);
+      if (videoIndex === -1) {
+        updatedVideos.push(index);
+      } else {
+        updatedVideos.splice(videoIndex, 1);
+      }
+      return updatedVideos;
+    });
+  };
+
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    const visibleIndices = viewableItems.map((item) => item.index);
+    setShouldPlay((prevShouldPlay) => {
+      const newShouldPlay = [...prevShouldPlay];
+      prevShouldPlay.forEach((shouldPlay, index) => {
+        if (!visibleIndices.includes(index)) {
+          newShouldPlay[index] = false;
+        }
+      });
+      return newShouldPlay;
+    });
+  }).current;
+
+  const renderVideoItem = ({ item, index }) => (
+    <View style={styles.videoContainer}>
+      <TouchableOpacity
+        onDoublePress={() => capitalizeVideo(index)}
+        style={styles.videoTouchable}
+      >
+        <Video
+          key={index}
+          style={styles.video}
+          source={item}
+          resizeMode="contain"
+          isLooping
+          isMuted={true}
+          shouldPlay={shouldPlay[index]}
+          onPlaybackStatusUpdate={(playbackStatus) => setStatus({ ...status, [index]: playbackStatus })}
+        />
+      </TouchableOpacity>
+      <MenuButton onPress={() => openOptionsModal()} />
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.main}>
+      <Header />
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>Here are the CCTVs</Text>
+      </View>
+      <FlatList
+        ref={flatListRef}
+        data={videos}
+        renderItem={renderVideoItem}
+        keyExtractor={(_, index) => index.toString()}
+        numColumns={1}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+      />
+      <Modal
+        visible={optionsModalVisible}
+        transparent={true}
+        onRequestClose={() => closeOptionsModal()}
+      >
+        <VideoOptions onClose={() => closeOptionsModal()} />
+      </Modal>
+    </SafeAreaView>
+  );
+};
 
 const MenuButton = ({ onPress }) => (
   <TouchableOpacity style={styles.menuButton} onPress={onPress}>
     <Ionicons name="menu-outline" size={24} color={colors.white} />
   </TouchableOpacity>
 );
-
-const TrafficPoliceHomeScreen = () => {
-
-  const [fontsLoaded] = useFonts ({
-    'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf')
-  })
-
-  const video1 = React.useRef(null);
-  const video2 = React.useRef(null);
-
-  // states to handle videos
-  const [statusVideo1, setStatusVideo1] = React.useState();
-  const [statusVideo2, setStatusVideo2] = React.useState();
-
-  // states to handle video options
-  const [isModalVisible, setIsModalVisible] = React.useState(false);
-  const [selectedOption, setSelectedOption] = React.useState('');
-
-  // function to handle option selection
-  const handleOptionSelection = (option) => {
-    console.log('Selected Option: ${option}');
-    setIsModalVisible(false);
-  }
-
-  return (
-    <SafeAreaView
-      style={styles.main}
-    >
-      <View style={styles.main}>
-        <Header title ='Footages'/>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Here are the CCTVs</Text>
-        </View>
-        <ScrollView style={styles.scrollViewContainer}>
-
-          <View style={styles.videoContainer}>
-            <MenuButton onPress={() => {setIsModalVisible(true)}} />
-            <Video
-              ref={video1}
-              style={styles.video}
-              source={require('../assets/videos/video1.mp4')}
-              useNativeControls
-              resizeMode="contain"
-              isLooping
-              onPlaybackStatusUpdate={setStatusVideo1}
-            />
-          </View>
-
-          <VideoOptions 
-            visible={isModalVisible}
-            onClose={() => setIsModalVisible(false)}
-            onOptionSelect={handleOptionSelection}
-          />
-
-          <View style={styles.videoContainer}>
-            <MenuButton onPress={() => {setIsModalVisible(true)}} />
-            <Video
-              ref={video2}
-              style={styles.video}
-              source={require('../assets/videos/video2.mp4')}
-              useNativeControls
-              resizeMode="contain"
-              isLooping
-              onPlaybackStatusUpdate={setStatusVideo2}
-            />
-          </View>
-
-          <VideoOptions 
-            visible={isModalVisible}
-            onClose={() => setIsModalVisible(false)}
-            onOptionSelect={handleOptionSelection}
-          />
-            
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
-};
 
 const styles = StyleSheet.create({
   main: {
@@ -117,19 +132,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.white,
     textAlign: 'center',
-    margin: 5,
-    fontFamily: 'Raleway-Regular'
-  },
-  scrollViewContainer: {
-    flex: 1,
-    width: '100%',
-    alignSelf: 'center',
-    backgroundColor: colors.black_darker
-    // alignItems: 'center',
-    // justifyContent: 'center'
+    margin: 15,
+    fontFamily: 'Raleway-Regular',
   },
   video: {
-    margin: 10,
     width: '95%',
     aspectRatio: 16 / 9,
   },
@@ -137,10 +143,15 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 10,
+    position: 'relative',
   },
-
+  videoTouchable: {
+    width: '100%',
+  },
   menuButton: {
-    marginHorizontal: 10,
+    position: 'absolute',
+    top: 10,
+    left: 10,
   },
 });
 

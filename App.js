@@ -9,7 +9,7 @@ import SplashScreen from './components/Splash';
 import ProfileScreen from './components/ProfileScreen';
 import Settings from './components/Settings';
 import AboutUs from './components/AboutUs';
-import { UserProvider } from './components/UserContext';
+import { UserProvider } from './globals/UserContext';
 import TrafficPoliceHomeScreen from './components/TrafficPoliceHomeScreen';
 import FireBrigadeHomeScreen from './components/FireBrigadeHomeScreen';
 import ParamedicsHomeScreen from './components/ParamedicsHomeScreen';
@@ -39,6 +39,10 @@ const App = () => {
             component={Signup}
           />
           <Stack.Screen
+            name='ProfileScreen'
+            component={ProfileScreen}
+          />
+          <Stack.Screen
             name="TrafficPoliceHomeScreen"
             component={TrafficPoliceHomeScreen}
           />
@@ -57,10 +61,6 @@ const App = () => {
           <Stack.Screen
             name="Settings"
             component={Settings}
-          />
-          <Stack.Screen
-            name='ProfileScreen'
-            component={ProfileScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

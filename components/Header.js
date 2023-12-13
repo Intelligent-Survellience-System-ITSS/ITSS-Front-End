@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font';
 
 // importing globals:
 import colors from '../globals/Colors';
+import { useUser } from '../globals/UserContext';
 
 export default function Header() {
   const [fontsLoaded] = useFonts({
@@ -17,13 +18,33 @@ export default function Header() {
 
   const navigation = useNavigation();
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const { user, loading } = useUser();
+  // console.log(user)
 
   const handleProfileClick = () => {
     navigation.navigate('ProfileScreen');
   };
 
   const handleITSSClick = () => {
-    navigation.navigate('HomeScreen');
+    if (!loading && user) {
+      if (user.designation) {
+        switch (user.designation) {
+          case 'Paramedics':
+            navigation.replace('ParamedicsHomeScreen');
+            break;
+          case 'Fire Brigade':
+            navigation.replace('FireBrigadeHomeScreen');
+            break;
+          case 'Traffic Police':
+            navigation.replace('TrafficPoliceHomeScreen');
+            break;
+          default:
+            console.log("User designation is not recognized");
+        }
+      } else {
+        console.log("User or designation is undefined");
+      }
+    }
   };
 
   const toggleMenu = () => {
@@ -103,18 +124,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logoContainer: {
-    width: 90, // Increased width for the circle
-    height: 50, // Increased height for the circle
-    borderBottomLeftRadius: 80, // Adjusted radius for the semicircle
-    borderBottomRightRadius: 80, // Adjusted radius for the semicircle
+    width: 90,
+    height: 50,
+    borderBottomLeftRadius: 80,
+    borderBottomRightRadius: 80,
     overflow: 'hidden',
     backgroundColor: colors.white,
     marginTop: -5,
     paddingBottom: 5
   },
   logoImage: {
-    width: '100%', // Occupy the entire space of the container
-    height: '100%', // Occupy the entire space of the container 
+    width: '100%',
+    height: '100%',
   },
   modalContainer: {
     backgroundColor: colors.black,

@@ -3,7 +3,9 @@ import { View, Text, TextInput, StyleSheet, ImageBackground, Dimensions, Touchab
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { useUser } from './UserContext';
+
+// importing globals:
+import { useUser } from '../globals/UserContext';
 import colors from '../globals/Colors';
 
 const screenHeight = Dimensions.get('window').height;
@@ -38,6 +40,7 @@ function Login({ navigation }) {
       const user = Object.values(data).find((user) => user.email === email && user.password === password);
   
       if (user) {
+        console.log("Logged-in user:", user);
         // Set the global state with the logged-in user data
         login(user);
   
@@ -45,15 +48,15 @@ function Login({ navigation }) {
         switch (user.designation) {
           case 'Paramedics':
             navigation.replace('ParamedicsHomeScreen');
+            console.log("Logged-in user:", user);
             break;
           case 'Fire Brigade':
             navigation.replace('FireBrigadeHomeScreen');
+            console.log("Logged-in user:", user);
             break;
           case 'Traffic Police':
             navigation.replace('TrafficPoliceHomeScreen');
-            break;
-          default:
-            navigation.replace('DefaultHomeScreen');
+            console.log("Logged-in user:", user);
             break;
         }
       } else {
