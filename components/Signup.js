@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -60,8 +60,39 @@ function Signup() {
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [employeeIdError, setEmployeeIdError] = useState('');
   const [designationError, setDesignationError] = useState('');
+  const [emailExistsError, setEmailExistsError] = useState('');
+
 
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    // Check if the email already exists in the system
+    const checkEmailExists = async () => {
+      try {
+        const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json");
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data.');
+        }
+
+        const userData = await response.json();
+        const emailExists = Object.values(userData || {}).some(user => user.email === email);
+
+        if (emailExists) {
+          setEmailExistsError('Email already exists. Please use a different email.');
+        } else {
+          setEmailExistsError('');
+        }
+      } catch (error) {
+        console.error('Error:', error.message);
+        alert('Failed to check email existence. Please try again.');
+      }
+    };
+
+    // Perform the check when the email is changed
+    if (email) {
+      checkEmailExists();
+    }
+  }, [email]);
 
   const goToDesignationScreen = () => {
     setModalVisible(true);
@@ -154,6 +185,12 @@ function Signup() {
       return;
     }
 
+    // Check if the email already exists in the system
+    if (emailExistsError) {
+      alert('Email already exists. Please use a different email.');
+      return;
+    }
+
     // validate password length
     if (password.length < MIN_LENGTH_PASS) {
       setPasswordError(`Password should be at least ${MIN_LENGTH_PASS} characters.`);
@@ -233,6 +270,7 @@ function Signup() {
               inputMode='email'
             />
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+            {emailExistsError ? <Text style={styles.errorText}>{emailExistsError}</Text> : null}
 
             <Text style={styles.label}>Password</Text>
             <TextInput
@@ -289,7 +327,7 @@ function Signup() {
                 style={styles.picker}
                 selectedValue={designation}
                 onValueChange={(itemValue) => setDesignation(itemValue)}
-                itemStyle={styles.pickerItem}
+              itemStyle={styles.pickerItem}
               >
                 <Picker.Item label="None" value="None" />
                 <Picker.Item label="Paramedics" value="Paramedics" />
@@ -379,12 +417,12 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   picker: {
-    color: 'black',
+    color: colors.black_darker,
     fontSize: 20,
-    backgroundColor: 'white',
+    backgroundColor: colors.white, 
   },
   pickerItem: {
-    color: 'black',
+    color: colors.black,
     fontSize: 16,
   },
   errorText: {

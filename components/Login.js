@@ -4,15 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-// importing globals:
+// Importing globals
 import { useUser } from '../globals/UserContext';
 import colors from '../globals/Colors';
+import { useUserData } from '../globals/Variables'; // Import the new hook
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 function Login({ navigation }) {
   const { login } = useUser();
+  const { updateUserData } = useUserData(); // Destructure the new function
 
   const [fontsLoaded] = useFonts({
     'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
@@ -38,11 +40,23 @@ function Login({ navigation }) {
       const data = await response.json();
   
       const user = Object.values(data).find((user) => user.email === email && user.password === password);
-  
+
+      
       if (user) {
-        console.log("Logged-in user:", user);
+        // console.log("Logged-in user:", user);
         // Set the global state with the logged-in user data
         login(user);
+
+        // Update the user's data (excluding password) using the new hook
+        updateUserData({
+          email: user.email,
+          designation: user.designation,
+          employeeId: user.employeeId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phoneNumber: user.phoneNumber
+          // Add other user-related fields as needed
+        });
   
         // Navigate to the home screen based on designation
         switch (user.designation) {
@@ -52,7 +66,7 @@ function Login({ navigation }) {
             break;
           case 'Fire Brigade':
             navigation.replace('FireBrigadeHomeScreen');
-            console.log("Logged-in user:", user);
+            console.log("Logged-in user:", user); 
             break;
           case 'Traffic Police':
             navigation.replace('TrafficPoliceHomeScreen');
@@ -72,58 +86,58 @@ function Login({ navigation }) {
     }
   };
 
-    const goToSignup = () => {
-        navigation.navigate('Signup');
-    };
+  const goToSignup = () => {
+    navigation.navigate('Signup');
+  };
 
-    return (
-        <SafeAreaView style={styles.main}>
-            <ImageBackground
-                source={require('../assets/pictures/courthouse-building.jpg')}
-                style={styles.main}>
-
-                <View style={styles.container}>
-                    <Text style={styles.signup}>Login</Text>
-                    <Text style={styles.provide_details_text}>
-                        Please provide these details to login
-                    </Text>
-                    <View style={styles.inputContainer}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.label}>Email</Text>
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your email"
-                            value={email}
-                            onChangeText={(text) => setEmail(text)}
-                            inputMode='email'
-                        />
-                        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.label}>Password</Text>
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your password"
-                            secureTextEntry={true}
-                            value={password}
-                            onChangeText={(text) => setPassword(text)}
-                        />
-                        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-                    </View>
-                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                        <FontAwesome5 name="sign-in-alt" size={20} color="white" style={styles.loginIcon} />
-                        <Text style={styles.buttonText}>Login</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.signup_text} onPress={goToSignup}>
-                        Don't have an account? Click to sign up.
-                    </Text>
-                </View>
-            </ImageBackground>
-        </SafeAreaView>
-    );
+  return (
+    <SafeAreaView style={styles.main}>
+      <ImageBackground
+        source={require('../assets/pictures/courthouse-building.jpg')}
+        style={styles.main}
+      >
+        <View style={styles.container}>
+          <Text style={styles.signup}>Login</Text>
+          <Text style={styles.provide_details_text}>
+            Please provide these details to login
+          </Text>
+          <View style={styles.inputContainer}>
+            <View style={styles.labelContainer}>
+              <Text style={styles.label}>Email</Text>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              inputMode="email"
+            />
+            {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+          </View>
+          <View style={styles.inputContainer}>
+            <View style={styles.labelContainer}>
+              <Text style={styles.label}>Password</Text>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              secureTextEntry={true}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+            />
+            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+          </View>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <FontAwesome5 name="sign-in-alt" size={20} color="white" style={styles.loginIcon} />
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+          <Text style={styles.signup_text} onPress={goToSignup}>
+            Don't have an account? Click to sign up.
+          </Text>
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

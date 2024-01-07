@@ -1,16 +1,18 @@
 import { useState } from 'react';
 
-export const useLogged = () => {
-  const [logged, setLogged] = useState(false);
+export const useUserData = () => {
+  const [userData, setUserData] = useState({
+    email: null,
+    designation: null,
+    employeeId: null,
+    firstName: null,
+    lastName: null,
+    phoneNumber: null
+  });
 
-  const updateLogged = (value) => {
-    setLogged((prevLogged) => {
-      console.log("val of logged before state update: " + prevLogged);
-      return value;
-    });
+  const updateUserData = (data) => {
+    setUserData(data);
   };
 
-  console.log("val of logged after updateLogged(): " + logged);
-
-  return { logged, updateLogged };
+  return { userData, updateUserData };
 };

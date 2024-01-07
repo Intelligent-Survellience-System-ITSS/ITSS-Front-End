@@ -1,106 +1,97 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import React, { useState, useEffect, useReducer } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ImageBackground, Modal, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../globals/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFonts } from 'expo-font';
-
-// importing globals:
-import { useUser } from '../globals/UserContext';
+import { useUserData } from '../globals/Variables';
 
 export default function ProfileScreen({ navigation }) {
-  const { userData } = useUser();
-  console.log('User Data:', userData);
-
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-
-  const [fontsLoaded] = useFonts({
-    'Raleway-Regular': require('../assets/fonts/Raleway/Raleway-Regular.ttf'),
-    'Inter-Black': require('../assets/fonts/Inter/Inter-Black.ttf')
-  });
+  const { userData, updateUserData } = useUserData();
 
   const [localFirstName, setLocalFirstName] = useState('');
   const [localLastName, setLocalLastName] = useState('');
   const [localDesignation, setLocalDesignation] = useState('');
   const [localEmployeeId, setLocalEmployeeId] = useState('');
+  const [fetchedData, setFetchedData] = useState([]);
+  const [emailModalVisible, setEmailModalVisible] = useState(true);
+  const [enteredEmail, setEnteredEmail] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Simulate data fetching delay (e.g., 3 seconds)
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        if (userData) {
-          setUser(userData);
-          setLocalFirstName(userData.firstName || 'couldnt fetch data...');
-          setLocalLastName(userData.lastName || '');
-          setLocalDesignation(userData.designation || '');
-          setLocalEmployeeId(userData.employeeId || '');
-        } else {
-          console.log("User data is undefined");
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [userData]);
-
-  useEffect(() => {
-    // Additional check to handle changes in userData
-    if (userData) {
-      setLocalFirstName(userData.firstName || 'couldnt fetch data...');
+    if (userData && userData.firstName) {
+      setLocalFirstName(userData.firstName);
       setLocalLastName(userData.lastName || '');
       setLocalDesignation(userData.designation || '');
       setLocalEmployeeId(userData.employeeId || '');
-      setLoading(false);
+    } else {
+      console.log("User data is missing or undefined");
+      setLocalFirstName('');
+      setLocalLastName('');
+      setLocalDesignation('');
+      setLocalEmployeeId('');
     }
   }, [userData]);
 
-  const goBack = () => {
-    navigation.goBack();
-  };
-
-  const goToHomeScreen = () => {
-    if (user && user.designation) {
-      switch (user.designation) {
-        case 'Paramedics':
-          navigation.replace('ParamedicsHomeScreen');
-          break;
-        case 'Fire Brigade':
-          navigation.replace('FireBrigadeHomeScreen');
-          break;
-        case 'Traffic Police':
-          navigation.replace('TrafficPoliceHomeScreen');
-          break;
-        default:
-          // Navigate to a default home screen if no designation matches
-          navigation.replace('DefaultHomeScreen');
-          break;
-      }
+  const logUserData = () => {
+    if (Array.isArray(fetchedData)) {
+      fetchedData.forEach((user) => {
+        console.log(user.firstName);
+      });
     } else {
-      // Handle the case when user or designation is undefined
-      console.log("User or designation is undefined");
+      console.log("Fetched data is not an array");
     }
   };
 
   const handleUpdateProfile = () => {
-    // console.log('Updated Profile:');
-    // console.log('First Name:', localFirstName);
-    // console.log('Last Name:', localLastName);
-    // console.log('Designation:', localDesignation);
-    // console.log('Employee ID:', localEmployeeId);
+    updateUserData({
+      ...userData,
+      firstName: localFirstName,
+      lastName: localLastName,
+      designation: localDesignation,
+      employeeId: localEmployeeId,
+    });
   };
+
+  const handleEmailModalClose = () => {
+    setEmailModalVisible(false);
+  };
+
+  const handleEmailSubmit = async () => {
+    
+      try {
+        const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json");
+    
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+    
+        const data = await response.json();
+        const user = Object.values(data).find((user) => user.email === enteredEmail);
+        console.log(user);
+        if(user) {
+          setLocalFirstName(user.firstName || '');
+          setLocalLastName(user.lastName || '');
+          setLocalDesignation(user.designation || '');
+          setLocalEmployeeId(user.employeeId || '');
+          // alert("Checked!");
+          handleEmailModalClose();
+        } else {
+          alert("Wrong Email");
+          alert("For the user's safety, we're logging you out!.");
+          navigation.replace("Login");
+        }
+        
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
 
   return (
     <SafeAreaView style={styles.container}>
+      <View>
+        {logUserData()}
+      </View>
       <View style={styles.header}>
-        <TouchableOpacity onPress={goBack}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} style={styles.icon} />
         </TouchableOpacity>
         <Text style={styles.headerText}>ITSS</Text>
@@ -153,9 +144,29 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity> */}
         </View>
 
+        {/* Email Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={emailModalVisible}
+          onRequestClose={handleEmailModalClose}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>Please enter your Email:</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={enteredEmail}
+                onChangeText={(text) => setEnteredEmail(text)}
+              />
+              <Button title="Submit" onPress={handleEmailSubmit} />
+            </View>
+          </View>
+        </Modal>
+
         <TouchableOpacity
           style={styles.itssContainer}
-          onPress={goToHomeScreen}
+          onPress={() => navigation.replace('HomeScreen')}
         >
           <ImageBackground
             source={require('../assets/pictures/logoITSS.png')}
@@ -242,10 +253,30 @@ const styles = StyleSheet.create({
     bottom: 20,
     alignSelf: 'center',
   },
-  itssText: {
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.orange,
+    marginBottom: 10,
+    fontFamily: 'Raleway-Regular'
+  },
+  modalInput: {
+    height: 40,
+    borderColor: colors.black,
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingLeft: 10,
     fontFamily: 'Raleway-Regular'
   },
 });

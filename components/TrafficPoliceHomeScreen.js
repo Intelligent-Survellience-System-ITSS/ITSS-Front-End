@@ -89,7 +89,7 @@ const TrafficPoliceHomeScreen = () => {
     <SafeAreaView style={styles.main}>
       <Header />
       <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>Here are the CCTVs</Text>
+        <Text style={styles.headerText}>Feed</Text>
       </View>
       <FlatList
         ref={flatListRef}
