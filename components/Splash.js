@@ -17,7 +17,7 @@ const SplashScreen = () => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       navigation.replace('Login');
-    }, 10000);
+    }, 2000);
 
     return () => clearTimeout(timeoutId); // Clear the timeout if the component unmounts
   }, [navigation]);

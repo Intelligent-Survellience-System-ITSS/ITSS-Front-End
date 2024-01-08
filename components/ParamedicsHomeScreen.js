@@ -12,7 +12,7 @@ export default function ParamedicsHomeScreen() {
         // Add more notifications as needed
     ];
 
-    const handleNotificationPress = (coordinates, location) => {
+    const handleNotificationPress = (coordinates) => {
         // Open Google Maps with the specified coordinates and provide navigation options
         const url = `https://www.google.com/maps/dir/?api=1&destination=${coordinates}&travelmode=driving`;
         Linking.openURL(url);
