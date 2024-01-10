@@ -153,7 +153,7 @@ export default function ProfileScreen({ navigation }) {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Please enter your Email:</Text>
+              <Text style={styles.modalText}>Please confirm your email:</Text>  
               <TextInput
                 style={styles.modalInput}
                 value={enteredEmail}
