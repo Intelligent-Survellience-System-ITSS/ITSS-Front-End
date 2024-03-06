@@ -12,9 +12,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { useFonts } from 'expo-font'
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 import { Platform } from 'react-native';
 
 // importing globals:
@@ -62,7 +64,6 @@ function Signup() {
   const [designationError, setDesignationError] = useState('');
   const [emailExistsError, setEmailExistsError] = useState('');
 
-
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -105,34 +106,12 @@ function Signup() {
 
   const saveDesignation = async (selectedDesignation, userId) => {
     try {
-      const userData = {
-        [userId]: {
-          firstName,
-          lastName,
-          email,
-          password,
-          phoneNumber,
-          employeeId,
-          designation: selectedDesignation,
-        },
-      };
-
-      // Perform the necessary API call to update the user's data
-      const response = await fetch("https://itss-2798c-default-rtdb.firebaseio.com/users.json", {
-        method: "PATCH",  // Use PATCH to update an existing user record
-        headers: {
-          'Content-Type': "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user data.');
-      }
-
-      // Assume the user data is successfully updated
-      alert('User data saved successfully.');
-
+      // Create a new user with email and password using Firebase Authentication
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+  
+      // Assume the user is successfully created
+      alert('User created successfully.');
+  
       // Now, you can navigate to different home screens based on the designation
       switch (selectedDesignation) {
         case 'Paramedics':
@@ -147,10 +126,10 @@ function Signup() {
       }
     } catch (error) {
       console.error('Error:', error.message);
-      alert('Failed to update user data. Please try again.');
+      alert('Failed to create user. Please try again.');
     }
   };
-
+  
   const fetchData = async () => {
     // reset error states
     setFirstNameError('');
@@ -160,60 +139,66 @@ function Signup() {
     setDesignationError('');
     setPhoneNumberError('');
     setEmployeeIdError('');
-
+  
     // validate inputs
     if (!firstName || !lastName || !email || !password || !phoneNumber || !employeeId) {
       alert('Please fill all the fields.');
       return;
     }
-
+  
     // validate individual fields
     if (firstName.length < MIN_LENGTH_NAME || firstName.length > MAX_LENGTH_NAME) {
       setFirstNameError('First Name should be between 3 and 20 characters.');
       return;
     }
-
+  
     if (lastName.length < MIN_LENGTH_NAME || lastName.length > MAX_LENGTH_NAME) {
       setLastNameError('Last Name should be between 3 and 20 characters.');
       return;
     }
-
+  
     // validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setEmailError('Enter a valid email address.');
       return;
     }
-
+  
     // Check if the email already exists in the system
     if (emailExistsError) {
       alert('Email already exists. Please use a different email.');
       return;
     }
-
+  
     // validate password length
     if (password.length < MIN_LENGTH_PASS) {
       setPasswordError(`Password should be at least ${MIN_LENGTH_PASS} characters.`);
       return;
     }
-
+  
     // validate phone number format
     const phoneRegex = /^\d+$/;
     if (!phoneRegex.test(phoneNumber)) {
       setPhoneNumberError('Enter a valid 10-digit phone number.');
       return;
     }
-
+  
     // validate employee id
     const employeeIdRegex = /^\d+$/;
     if (!employeeIdRegex.test(employeeId)) {
       setEmployeeIdError('Enter your employee ID.');
       return;
     }
-
-    // If everything is valid, proceed to the designation screen
-    goToDesignationScreen(selectedDesignation, userId);
+  
+    try {
+      // Save the user's designation and other details
+      await saveDesignation(selectedDesignation, userId);
+    } catch (error) {
+      console.error('Error:', error.message);
+      alert('Failed to save user data. Please try again.');
+    }
   };
+  
 
   const goToLogin = () => {
     navigation.navigate('Login');
@@ -327,7 +312,7 @@ function Signup() {
                 style={styles.picker}
                 selectedValue={designation}
                 onValueChange={(itemValue) => setDesignation(itemValue)}
-              itemStyle={styles.pickerItem}
+                itemStyle={styles.pickerItem}
               >
                 <Picker.Item label="None" value="None" />
                 <Picker.Item label="Paramedics" value="Paramedics" />

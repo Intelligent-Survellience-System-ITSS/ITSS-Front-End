@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { initializeApp } from '@react-native-firebase/app';
 
 // importing components:
 import Login from './components/Login';
@@ -17,6 +18,24 @@ import ParamedicsHomeScreen from './components/ParamedicsHomeScreen';
 const Stack = createStackNavigator();
 
 const App = () => {
+
+  // initializing firebase
+  useEffect(() => {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfC9KVdEXqB7vyAWeBnj_UsA7aQj-Zpms",
+      authDomain: "itss-92d25.firebaseapp.com",
+      projectId: "itss-92d25",
+      storageBucket: "itss-92d25.appspot.com",
+      messagingSenderId: "122559505125",
+      appId: "1:122559505125:web:bd7c7bfdffd8489c52ea0c",
+      measurementId: "G-EZBWZ3PJF2"
+    };
+
+    // initializing the app
+    initializeApp(firebaseConfig);
+
+  }, []);
+
   return (
     <UserProvider>
       <NavigationContainer>

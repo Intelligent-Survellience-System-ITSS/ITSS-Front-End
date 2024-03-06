@@ -43,11 +43,10 @@ function Login({ navigation }) {
 
       
       if (user) {
-        // console.log("Logged-in user:", user);
-        // Set the global state with the logged-in user data
         login(user);
 
-        // Update the user's data (excluding password) using the new hook
+
+        // update the user's data (excluding password) using the new hook
         updateUserData({
           email: user.email,
           designation: user.designation,
@@ -55,10 +54,9 @@ function Login({ navigation }) {
           firstName: user.firstName,
           lastName: user.lastName,
           phoneNumber: user.phoneNumber
-          // Add other user-related fields as needed
         });
   
-        // Navigate to the home screen based on designation
+        // navigate to the home screen based on designation
         switch (user.designation) {
           case 'Paramedics':
             navigation.replace('ParamedicsHomeScreen');
